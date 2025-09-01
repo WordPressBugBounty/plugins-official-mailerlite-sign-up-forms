@@ -40,7 +40,7 @@ class SidebarView
                             'mailerlite' ); ?></p>
 
                     <p>
-                        <a href="mailto:info@mailerlite.com?subject=MailerLite - Signup forms (official) for WordPress&body=<?php echo ( new Helper() )->getEmailBody(); ?>">info@mailerlite.com</a>
+                        <a href="mailto:support@mailerlite.com?subject=MailerLite - Signup forms (official) for WordPress&body=<?php echo ( new Helper() )->getEmailBody(); ?>">Contact MailerLite Support</a>
                     </p>
                 </div>
             </div>
