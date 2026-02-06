@@ -35,7 +35,7 @@ class CustomForm
                         <?php if ( ! empty( $form_data['title'] )) { ?>
                             <div class="mailerlite-form-title"><h3><?php echo $form_data['title']; ?></h3></div>
                         <?php } ?>
-                        <div class="mailerlite-form-description"><?php echo stripslashes( $form_data['description'] ); ?></div>
+                        <div class="mailerlite-form-description"><?php echo wp_kses_post( stripslashes( $form_data['description'] ) ); ?></div>
                         <div class="mailerlite-form-inputs">
                             <?php foreach ( $form_data['fields'] as $key => $field ): ?>
                                 <?php
@@ -91,7 +91,7 @@ class CustomForm
                         </div>
                         <div class="mailerlite-form-response">
                             <?php if ( ! empty( $form_data['success_message'] ) ) { ?>
-                                <h4><?php echo $form_data['success_message'] ?></h4>
+                                <h4><?php echo wp_kses_post( $form_data['success_message'] ); ?></h4>
                             <?php } else { ?>
                                 <h4><?php _e( 'Thank you for signing up!', 'mailerlite' ); ?></h4>
                             <?php } ?>

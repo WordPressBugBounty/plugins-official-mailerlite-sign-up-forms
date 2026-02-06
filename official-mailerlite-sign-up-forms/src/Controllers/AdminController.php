@@ -220,17 +220,17 @@ class AdminController
                         }
 
                         $form_data = [
-                            'title'           => $rolePermission->canEdit('form_title') ? $form_title : $form->data['form_title'],
-                            'description'     => $rolePermission->canEdit('form_description') ? wpautop( $form_description, true ) : $form->data['description'],
-                            'success_message' => $rolePermission->canEdit('success_message') ? wpautop( $success_message, true ) : $form->data['success_message'],
-                            'button'          => $rolePermission->canEdit('button_name') ? $button_name : $form->data['button'],
-                            'please_wait'     => $rolePermission->canEdit('please_wait') ? $please_wait : $form->data['please_wait'],
-                            'language'        => $rolePermission->canEdit('language') ? $language : $form->data['language'],
+                            'title'           => wp_kses_post( $rolePermission->canEdit('form_title') ? $form_title : $form->data['form_title'] ),
+                            'description'     => wp_kses_post( $rolePermission->canEdit('form_description') ? wpautop( $form_description, true ) : $form->data['description'] ),
+                            'success_message' => wp_kses_post( $rolePermission->canEdit('success_message') ? wpautop( $success_message, true ) : $form->data['success_message'] ),
+                            'button'          => wp_kses_post( $rolePermission->canEdit('button_name') ? $button_name : $form->data['button'] ),
+                            'please_wait'     => wp_kses_post( $rolePermission->canEdit('please_wait') ? $please_wait : $form->data['please_wait'] ),
+                            'language'        => wp_kses_post( $rolePermission->canEdit('language') ? $language : $form->data['language'] ),
                             'lists'           => $rolePermission->canEdit('groups') ? $form_lists : $form->data['lists'],
                             'fields'          => $rolePermission->canEdit('form_fields') ? $prepared_fields : $form->data['fields'],
                             'selected_groups' => $rolePermission->canEdit('groups') && isset($form_selected_groups) ? $form_selected_groups : $form->data['selected_groups'],
-                            'email_label' => $email_label,
-                            'email_placeholder' => $email_placeholder,
+                            'email_label' => wp_kses_post( $email_label ),
+                            'email_placeholder' => wp_kses_post( $email_placeholder ),
                         ];
 
                         $form_name = $rolePermission->canEdit('form_name') ? $form_name : $form->name;
