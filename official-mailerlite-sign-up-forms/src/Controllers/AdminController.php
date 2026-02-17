@@ -323,7 +323,8 @@ class AdminController
         } // Delete signup form view
         elseif ( isset( $_GET['view'] ) && isset( $_GET['id'] )
                  && $_GET['view'] == 'delete'
-                 && absint( $_GET['id'] ) ) {
+                 && absint( $_GET['id'] )
+                 && current_user_can( 'manage_options' )) {
             $wpdb->delete(
                 $wpdb->base_prefix . 'mailerlite_forms', [ 'id' => absint( $_GET['id'] ) ]
             );

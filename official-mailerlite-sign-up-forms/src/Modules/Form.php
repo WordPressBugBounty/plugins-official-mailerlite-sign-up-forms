@@ -5,6 +5,7 @@ use MailerLiteForms\Admin\Views\CreateCustomView;
 use MailerLiteForms\Api\ApiType;
 use MailerLiteForms\Api\PlatformAPI;
 use MailerLiteForms\Controllers\AdminController;
+use MailerLiteForms\Helper;
 use MailerLiteForms\Views\CustomForm;
 use MailerLiteForms\Views\EmbeddedForm;
 use MailerLiteForms\Views\InvalidForm;
@@ -276,15 +277,17 @@ class Form
             ];
 
             if ( array_key_exists( 'create_signup_form_now', $_POST ) ) {
-                $form_name          = $_POST['form_name'];
+                $form_name = htmlspecialchars(Helper::issetWithDefault( 'form_name',
+                    __( 'Subscribe for newsletter!', 'mailerlite' ) ));
                 $form_data['lists'] = $_POST['form_lists'];
                 $selected_groups = explode(';*',$_POST['selected_groups']);
-
                 foreach ($selected_groups as $group) {
                     $group = explode('::', $group);
-                    $group_data = [];
-                    $group_data['id'] = $group[0];
-                    $group_data['name'] = $group[1];
+                    $group_data = [
+                        'id'   => sanitize_text_field($group[0]),
+                        'name' => sanitize_text_field($group[1]),
+                    ];
+
                     $form_data['selected_groups'][] = (object)$group_data;
                 }
             } else {
