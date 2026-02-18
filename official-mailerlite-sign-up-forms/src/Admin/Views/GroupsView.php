@@ -34,6 +34,11 @@ class GroupsView
         <tbody>
         <?php
         /** @var MailerLiteGroup $group */
+        $lists = [];
+
+        if ($form) {
+            $lists = $form->data['lists'];
+        }
         foreach ( $groups as $group ) { ?>
             <tr>
                 <th style="width:1%;"><input
@@ -43,7 +48,7 @@ class GroupsView
                         name="form_lists[]"
                         value="<?php echo $group->id; ?>"<?php echo in_array( $group->
                     id,
-                        $form->data['lists'] ) ? ' checked="checked"' : ''; ?>>
+                        $lists ) ? ' checked="checked"' : ''; ?>>
                 </th>
                 <td>
                     <label for="list_<?php echo $group->id; ?>"><?php echo $group->name; ?></label>

@@ -418,23 +418,31 @@ class AdminController
 
         check_admin_referer( 'mailerlite_load_more_groups', 'ml_nonce' );
 
-        $form_id = absint( $_POST['form_id'] );
-        $offset  = absint( $_POST['offset'] );
+        $form_id = absint( isset( $_POST['form_id'] ) ? $_POST['form_id'] : 0 );
+        $offset  = absint( isset( $_POST['offset'] ) ? $_POST['offset'] : 0 );
 
-        $query = $wpdb->prepare(
-            "SELECT *
+        $form = null;
+        $lists = [];
+
+        if ($form_id > 0) {
+            $query = $wpdb->prepare(
+                "SELECT *
         FROM {$wpdb->base_prefix}mailerlite_forms
         WHERE id=%d",
-            $form_id
-        );
+                $form_id
+            );
 
-        $form = $wpdb->get_row($query);
+            $form = $wpdb->get_row($query);
 
-        $form->data = unserialize( $form->data );
 
-        $ML_Groups = new PlatformAPI( self::apiKey() );
+            if ($form) {
+                $form->data = unserialize($form->data);
 
-        $lists = $form->data['lists'];
+                $lists = $form->data['lists'];
+            }
+        }
+
+        $ML_Groups = new PlatformAPI(self::apiKey());
 
         $groups_from_ml_extended = $ML_Groups->getMoreGroups(self::FIRST_GROUP_LOAD, $offset);
 

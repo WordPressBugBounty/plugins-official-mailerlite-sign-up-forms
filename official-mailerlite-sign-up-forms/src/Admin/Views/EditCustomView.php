@@ -454,6 +454,7 @@ class EditCustomView
                         },
                         body: new URLSearchParams({
                             action: 'mailerlite_get_more_groups', offset: groupsElement.dataset.offset,
+                            form_id: <?php echo $form_id; ?>,
                             ml_nonce: '<?php echo wp_create_nonce( 'mailerlite_load_more_groups' );?>'
                         })
                     })
