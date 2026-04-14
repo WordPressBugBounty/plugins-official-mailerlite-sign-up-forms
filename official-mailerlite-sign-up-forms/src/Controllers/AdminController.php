@@ -38,6 +38,12 @@ class AdminController
      */
     public static function forms() {
 
+        $rolePermission = RolePermissionController::instance();
+
+        if (!$rolePermission->isAllowed()) {
+            wp_die( esc_html__( 'You do not have permission to view this page.', 'mailerlite' ) );
+        }
+
         global $wpdb;
 
         $api_key = self::apiKey();
@@ -51,7 +57,9 @@ class AdminController
 
         // Create new signup form view
         if ( isset( $_GET['view'] ) && $_GET['view'] == 'create' ) {
-
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'You do not have permission to view this page.', 'mailerlite' ) );
+            }
             if ( isset( $_POST['create_signup_form'] ) ) {
 
                 ( new Form() )->create_new_form( $_POST );
@@ -89,8 +97,8 @@ class AdminController
 
         } // Edit signup form view
         elseif ( isset( $_GET['view'] ) && isset( $_GET['id'] )
-                 && $_GET['view'] == 'edit'
-                 && absint( $_GET['id'] )
+            && $_GET['view'] == 'edit'
+            && absint( $_GET['id'] )
         ) {
             $_POST = array_map( 'stripslashes_deep', $_POST );
 
@@ -170,7 +178,6 @@ class AdminController
                     $fields    = $API->getFields();
 
                     if ( isset( $_POST['save_custom_signup_form'] ) ) {
-                        $rolePermission = RolePermissionController::instance();
 
                         $form_name        = htmlspecialchars(Helper::issetWithDefault( 'form_name',
                             __( 'Subscribe for newsletter!', 'mailerlite' ) ));
@@ -186,13 +193,13 @@ class AdminController
                         $language         = htmlspecialchars(Helper::issetWithDefault( 'language' ));
 
                         $selected_fields = isset( $_POST['form_selected_field'] )
-                                           && is_array(
-                                               $_POST['form_selected_field']
-                                           ) ? $_POST['form_selected_field'] : [];
+                        && is_array(
+                            $_POST['form_selected_field']
+                        ) ? $_POST['form_selected_field'] : [];
                         $field_titles    = isset( $_POST['form_field'] )
-                                           && is_array(
-                                               $_POST['form_field']
-                                           ) ? $_POST['form_field'] : [];
+                        && is_array(
+                            $_POST['form_field']
+                        ) ? $_POST['form_field'] : [];
 
                         $email_label =  htmlspecialchars(Helper::issetWithDefault( 'email_label',
                             __( 'Email', 'mailerlite' ) ));
@@ -283,7 +290,7 @@ class AdminController
                         $form_name = Helper::issetWithDefault( 'form_name', __( 'Embedded webform', 'mailerlite' ) );
 
                         $form_webform_id = isset( $_POST['form_webform_id'] )
-                                           && isset( $parsed_webforms[ $_POST['form_webform_id'] ] )
+                        && isset( $parsed_webforms[ $_POST['form_webform_id'] ] )
                             ? absint( $_POST['form_webform_id'] ) : 0;
 
                         $form_data = [
@@ -322,9 +329,9 @@ class AdminController
             }
         } // Delete signup form view
         elseif ( isset( $_GET['view'] ) && isset( $_GET['id'] )
-                 && $_GET['view'] == 'delete'
-                 && absint( $_GET['id'] )
-                 && current_user_can( 'manage_options' )) {
+            && $_GET['view'] == 'delete'
+            && absint( $_GET['id'] )
+            && current_user_can( 'manage_options' )) {
             $wpdb->delete(
                 $wpdb->base_prefix . 'mailerlite_forms', [ 'id' => absint( $_GET['id'] ) ]
             );

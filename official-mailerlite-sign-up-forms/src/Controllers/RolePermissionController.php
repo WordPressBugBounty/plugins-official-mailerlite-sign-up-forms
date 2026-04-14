@@ -41,7 +41,6 @@ class RolePermissionController
     public function __construct()
     {
         global $wp_roles;
-        global $current_user;
         $roles = isset($wp_roles) ? $wp_roles->get_names() : [];
         foreach($roles as $key => $value) {
             if (!in_array($key, ['administrator', 'customer', 'subscriber'])) {
@@ -54,7 +53,7 @@ class RolePermissionController
         $this->roles = array_keys($roles);
         $this->rolesWithNames = $roles;
         $this->settings = get_option('mailerlite_forms_user_role_settings', []);
-        $this->loggedInUser = $current_user;
+        $this->loggedInUser = $this->getCurrentUserWithRoles();
 
         if(empty($this->settings)) {
             update_option('mailerlite_forms_user_role_settings', [
@@ -88,6 +87,18 @@ class RolePermissionController
     public static function instance()
     {
         return new self;
+    }
+
+    private function getCurrentUserWithRoles()
+    {
+        $user = wp_get_current_user();
+        if (empty($user->roles) && $user->ID > 0) {
+            $user_data = get_userdata($user->ID);
+            if ($user_data && !empty($user_data->roles)) {
+                $user->roles = $user_data->roles;
+            }
+        }
+        return $user;
     }
 
     public function isAdmin()
