@@ -63,8 +63,9 @@ class Hooks
         $account_subdomain          = get_option( 'account_subdomain' );
         $mailerlite_popups_disabled = get_option( 'mailerlite_popups_disabled' );
         $platform                   = intval(get_option( 'mailerlite_platform', 1));
+        $activeWooPlugin            = in_array( 'woo-mailerlite/woo-mailerlite.php', (array) get_option( 'active_plugins', [] ) );
 
-        if ( ! $mailerlite_popups_disabled && $mailerlite_api_key && $account_id && $account_subdomain && $platform == ApiType::CURRENT ) {
+        if ( ! $mailerlite_popups_disabled && $mailerlite_api_key && $account_id && $account_subdomain && $platform == ApiType::CURRENT && !$activeWooPlugin ) {
 
             add_action( 'wp_head', [
                 '\MailerLiteForms\Helper',
@@ -72,7 +73,7 @@ class Hooks
             ] );
         }
 
-        if ( $mailerlite_api_key && $account_id && $platform == ApiType::REWRITE ) {
+        if ( $mailerlite_api_key && $account_id && $platform == ApiType::REWRITE && !$activeWooPlugin ) {
 
             add_action( 'wp_head', [
                 '\MailerLiteForms\Helper',
