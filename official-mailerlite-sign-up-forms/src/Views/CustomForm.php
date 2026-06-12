@@ -68,11 +68,11 @@ class CustomForm
                                 }
                                 ?>
                                 <div class="mailerlite-form-field">
-                                    <label for="mailerlite-<?php echo $form_id; ?>-field-<?php echo $key; ?>"><?php echo ($key == 'email') ? ($form_data['email_label'] ?? $title) : $title; ?></label>
-                                    <input id="mailerlite-<?php echo $form_id; ?>-field-<?php echo $key; ?>"
+                                    <label for="mailerlite-<?php echo $form_id; ?>-field-<?php echo esc_attr( $key ); ?>"><?php echo ($key == 'email') ? esc_html( $form_data['email_label'] ?? $title ) : esc_html( $title ); ?></label>
+                                    <input id="mailerlite-<?php echo $form_id; ?>-field-<?php echo esc_attr( $key ); ?>"
                                            type="<?php echo $input_type; ?>" <?php if ($input_type === 'email') { ?>required="required" <?php } ?>
-                                           name="form_fields[<?php echo $key; ?>]"
-                                           placeholder="<?php echo ($key == 'email') ? ($form_data['email_placeholder'] ?? $title) : $title; ?>"/>
+                                           name="form_fields[<?php echo esc_attr( $key ); ?>]"
+                                           placeholder="<?php echo esc_attr( ($key == 'email') ? ($form_data['email_placeholder'] ?? $title) : $title ); ?>"/>
                                 </div>
                             <?php endforeach; ?>
                             <div class="mailerlite-form-loader"><?php if ( ! empty( $form_data['please_wait'] ) ) {

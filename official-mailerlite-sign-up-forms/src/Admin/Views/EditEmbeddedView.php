@@ -3,6 +3,7 @@
 namespace MailerLiteForms\Admin\Views;
 
 use MailerLiteForms\Api\ApiType;
+use MailerLiteForms\Helper;
 use MailerLiteForms\Models\MailerLiteWebForm;
 
 class EditEmbeddedView
@@ -51,6 +52,7 @@ class EditEmbeddedView
                     <div id="post-body-content">
                         <form action="<?php echo admin_url( 'admin.php?page=mailerlite_main&view=edit&id=' . $form_id ); ?>"
                               method="post">
+                            <?php Helper::nonce_field(); ?>
 
                             <input type="text" class="form-large" name="form_name" size="30" maxlength="255"
                                    value="<?php echo $form->name; ?>" id="form_name"

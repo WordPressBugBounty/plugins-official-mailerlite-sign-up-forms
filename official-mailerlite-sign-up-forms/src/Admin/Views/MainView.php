@@ -100,7 +100,7 @@ class MainView
                                                 <span class="trash"><a
                                                         onclick="return confirm('<?php _e( "Are you sure you want to delete this form?",
                                                             'mailerlite' ); ?>')"
-                                                        href="<?php echo admin_url( 'admin.php?page=mailerlite_main&view=delete&noheader=true&id=' . $form->id ); ?>"><?php _e( 'Delete',
+                                                        href="<?php echo wp_nonce_url( admin_url( 'admin.php?page=mailerlite_main&view=delete&noheader=true&id=' . $form->id ), 'ml_form', 'ml_nonce' ); ?>"><?php _e( 'Delete',
                                                             'mailerlite' ); ?></a></span>
                                                 <?php endif; ?>
                                             </div>

@@ -2,6 +2,7 @@
 
 namespace MailerLiteForms\Admin\Views;
 
+use MailerLiteForms\Helper;
 use MailerLiteForms\Models\MailerLiteWebForm;
 
 class CreateView
@@ -42,6 +43,7 @@ class CreateView
 
                         <form action="<?php echo admin_url( 'admin.php?page=mailerlite_main&view=create&noheader=true' ); ?>"
                               method="post">
+                            <?php Helper::nonce_field(); ?>
                             <div class="inside">
 
                                 <div class="mailerlite-list">

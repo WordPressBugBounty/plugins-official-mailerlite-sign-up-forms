@@ -169,6 +169,14 @@ class Helper
         return $default;
     }
 
+    public static function nonce_field() {
+        wp_nonce_field( 'ml_form', 'ml_nonce' );
+    }
+
+    public static function verify_nonce() {
+        check_admin_referer( 'ml_form', 'ml_nonce' );
+    }
+
     /**
      * Helper to create a unique nonce
      *
@@ -183,5 +191,5 @@ class Helper
             ] );
         }
     }
-    
+
 }

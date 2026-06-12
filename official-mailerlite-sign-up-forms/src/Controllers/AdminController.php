@@ -62,6 +62,8 @@ class AdminController
             }
             if ( isset( $_POST['create_signup_form'] ) ) {
 
+                Helper::verify_nonce();
+
                 ( new Form() )->create_new_form( $_POST );
 
                 wp_redirect(
@@ -178,6 +180,7 @@ class AdminController
                     $fields    = $API->getFields();
 
                     if ( isset( $_POST['save_custom_signup_form'] ) ) {
+                        Helper::verify_nonce();
 
                         $form_name        = htmlspecialchars(Helper::issetWithDefault( 'form_name',
                             __( 'Subscribe for newsletter!', 'mailerlite' ) ));
@@ -210,6 +213,7 @@ class AdminController
                         $prepared_fields = [];
 
                         foreach ( $selected_fields as $field ) {
+                            $field = sanitize_key( $field );
                             if ( isset( $field_titles[ $field ] ) ) {
                                 $prepared_fields[ $field ] = [];
                                 $prepared_fields[ $field ]['title'] = htmlspecialchars($field_titles[ $field ]);
@@ -287,6 +291,7 @@ class AdminController
                     }
 
                     if ( isset( $_POST['save_embedded_signup_form'] ) ) {
+                        Helper::verify_nonce();
                         $form_name = Helper::issetWithDefault( 'form_name', __( 'Embedded webform', 'mailerlite' ) );
 
                         $form_webform_id = isset( $_POST['form_webform_id'] )
@@ -332,6 +337,7 @@ class AdminController
             && $_GET['view'] == 'delete'
             && absint( $_GET['id'] )
             && current_user_can( 'manage_options' )) {
+            Helper::verify_nonce();
             $wpdb->delete(
                 $wpdb->base_prefix . 'mailerlite_forms', [ 'id' => absint( $_GET['id'] ) ]
             );
