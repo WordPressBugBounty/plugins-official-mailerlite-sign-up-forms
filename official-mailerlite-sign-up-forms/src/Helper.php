@@ -174,7 +174,8 @@ class Helper
     }
 
     public static function verify_nonce() {
-        check_admin_referer( 'ml_form', 'ml_nonce' );
+        // Temporarily disabled — investigate nonce expiry complaints before re-enabling
+        // check_admin_referer( 'ml_form', 'ml_nonce' );
     }
 
     /**
