@@ -2,6 +2,8 @@
 
 namespace MailerLiteForms\Admin\Views;
 
+use MailerLiteForms\Helper;
+
 class CreateCustomView
 {
 
@@ -37,6 +39,7 @@ class CreateCustomView
 
                         <form action="<?php echo admin_url( 'admin.php?page=mailerlite_main&view=create&noheader=true' ); ?>"
                               method="post" id="create_custom">
+                            <?php Helper::nonce_field(); ?>
                             <input type="hidden" name="create_signup_form_now" value="1">
                             <div class="inside">
 
