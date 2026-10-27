@@ -55,7 +55,7 @@ class EditEmbeddedView
                             <?php Helper::nonce_field(); ?>
 
                             <input type="text" class="form-large" name="form_name" size="30" maxlength="255"
-                                   value="<?php echo $form->name; ?>" id="form_name"
+                                   value="<?php echo esc_attr( $form->name ); ?>" id="form_name"
                                    placeholder="<?php echo __( 'Form title', 'mailerlite' ); ?>">
                             <div>
                                 <?php echo __( 'Use the shortcode', 'mailerlite' ); ?>
@@ -77,9 +77,9 @@ class EditEmbeddedView
                                                 <?php if ( ! in_array( $webform->type, [ 'embed', 'embedded', 'button' ] ) ) {
                                                     continue;
                                                 } ?>
-                                                <option data-code="<?php echo $webform->code; ?>"
-                                                        value="<?php echo $webform->id; ?>"<?php echo $webform->id == $form->data['id'] ? ' selected="selected"' : ''; ?>><?php echo $webform->name; ?>
-                                                    (<?php echo $webform->type; ?>)
+                                                <option data-code="<?php echo esc_attr( $webform->code ); ?>"
+                                                        value="<?php echo esc_attr( $webform->id ); ?>"<?php echo $webform->id == $form->data['id'] ? ' selected="selected"' : ''; ?>><?php echo esc_html( $webform->name ); ?>
+                                                    (<?php echo esc_html( $webform->type ); ?>)
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>

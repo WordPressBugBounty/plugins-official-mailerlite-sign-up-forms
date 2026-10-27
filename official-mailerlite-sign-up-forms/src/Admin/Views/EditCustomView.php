@@ -58,7 +58,7 @@ class EditCustomView
                             <?php Helper::nonce_field(); ?>
 
                             <input type="text" name="form_name" class="form-large" size="30" maxlength="255"
-                                   value="<?php echo $form->name; ?>" id="form_name"
+                                   value="<?php echo esc_attr( $form->name ); ?>" id="form_name"
                                    placeholder="<?php _e( 'Form name', 'mailerlite' ); ?>"
                             <?php echo !$rolePermission->canEdit('form_name') ? 'disabled' : ''; ?>
                             >
@@ -96,7 +96,7 @@ class EditCustomView
                                                 </th>
                                                 <td>
                                                     <input type="text" class="regular-text" name="form_title" size="30"
-                                                           maxlength="255" value="<?php echo $form->data['title']; ?>"
+                                                           maxlength="255" value="<?php echo esc_attr( $form->data['title'] ); ?>"
                                                            id="form_title"
                                                     <?php echo !$rolePermission->canEdit('form_title') ? 'disabled' : ''; ?>
                                                     >
@@ -154,7 +154,7 @@ class EditCustomView
                                                 <td>
                                                     <input type="text" class="regular-text" name="email_label" size="30"
                                                            maxlength="255"
-                                                           value="<?php echo $form->data['email_label']; ?>" id="email_label"
+                                                           value="<?php echo esc_attr( $form->data['email_label'] ); ?>" id="email_label"
                                                         <?php echo !$rolePermission->canEdit('email_label') ? 'disabled' : ''; ?>
                                                     >
                                                 </td>
@@ -168,7 +168,7 @@ class EditCustomView
                                                 <td>
                                                     <input type="text" class="regular-text" name="email_placeholder" size="30"
                                                            maxlength="255"
-                                                           value="<?php echo $form->data['email_placeholder']; ?>" id="email_placeholder"
+                                                           value="<?php echo esc_attr( $form->data['email_placeholder'] ); ?>" id="email_placeholder"
                                                         <?php echo !$rolePermission->canEdit('email_placeholder') ? 'disabled' : ''; ?>
                                                     >
                                                 </td>
@@ -179,7 +179,7 @@ class EditCustomView
                                                             'mailerlite' ); ?></label>
                                                 </th>
                                                 <td><input type="text" class="regular-text" name="button_name" size="30"
-                                                           maxlength="255" value="<?php echo $form->data['button']; ?>"
+                                                           maxlength="255" value="<?php echo esc_attr( $form->data['button'] ); ?>"
                                                            id="button_name"
                                                         <?php echo !$rolePermission->canEdit('button_name') ? 'disabled' : ''; ?>
                                                     >
@@ -193,7 +193,7 @@ class EditCustomView
                                                 <td><input type="text" class="regular-text" name="please_wait" size="30"
                                                            maxlength="255"
                                                            value="<?php if ( isset( $form->data['please_wait'] ) ) {
-                                                               echo $form->data['please_wait'];
+                                                               echo esc_attr( $form->data['please_wait'] );
                                                            } ?>" id="please_wait_name"
                                                         <?php echo !$rolePermission->canEdit('please_wait') ? 'disabled' : ''; ?>
                                                     >
@@ -248,19 +248,19 @@ class EditCustomView
                                                                          class="input_control <?php
                                                                          echo $key == 'email' ? 'ml-read-only' : ''; ?>"
                                                                          name="form_selected_field[]"
-                                                                         value="<?php echo $key; ?>"
+                                                                         value="<?php echo esc_attr( $key ); ?>"
                                                                          checked="checked">
                                                                     <span class="ml-grip"></span>
                                                                 </th>
                                                                 <td>
-                                                                    <input type="text" id="field_<?php echo $key; ?>"
-                                                                       name="form_field[<?php echo $key; ?>]"
+                                                                    <input type="text" id="field_<?php echo esc_attr( $key ); ?>"
+                                                                       name="form_field[<?php echo esc_attr( $key ); ?>]"
                                                                        size="30" maxlength="255"
-                                                                       value="<?php echo $title; ?>" class="<?php
+                                                                       value="<?php echo esc_attr( $title ); ?>" class="<?php
                                                                     echo $key == 'email' ? 'ml-read-only' : ''; ?>">
-                                                                    <input type="hidden" id="field_type_<?php echo $key; ?>"
-                                                                           name="field_type_<?php echo $key; ?>"
-                                                                           value="<?php echo $field['type'] ?? $key; ?>">
+                                                                    <input type="hidden" id="field_type_<?php echo esc_attr( $key ); ?>"
+                                                                           name="field_type_<?php echo esc_attr( $key ); ?>"
+                                                                           value="<?php echo esc_attr( $field['type'] ?? $key ); ?>">
                                                                 </td>
                                                             </tr>
                                                         <?php
@@ -278,16 +278,16 @@ class EditCustomView
                                                                     <input type="checkbox"
                                                                          class="input_control"
                                                                          name="form_selected_field[]"
-                                                                         value="<?php echo $field->key; ?>">
+                                                                         value="<?php echo esc_attr( $field->key ); ?>">
                                                                     <span class="ml-grip"></span>
                                                                 </th>
-                                                                <td><input type="text" id="field_<?php echo $field->key; ?>"
-                                                                           name="form_field[<?php echo $field->key; ?>]"
+                                                                <td><input type="text" id="field_<?php echo esc_attr( $field->key ); ?>"
+                                                                           name="form_field[<?php echo esc_attr( $field->key ); ?>]"
                                                                            size="30" maxlength="255"
-                                                                           value="<?php echo $field->title; ?>">
-                                                                    <input type="hidden" id="field_type_<?php echo $field->key; ?>"
-                                                                           name="field_type_<?php echo $field->key; ?>"
-                                                                           value="<?php echo $field->type; ?>">
+                                                                           value="<?php echo esc_attr( $field->title ); ?>">
+                                                                    <input type="hidden" id="field_type_<?php echo esc_attr( $field->key ); ?>"
+                                                                           name="field_type_<?php echo esc_attr( $field->key ); ?>"
+                                                                           value="<?php echo esc_attr( $field->type ); ?>">
                                                                 </td>
                                                             </tr>
                                                         <?php endforeach; ?>
@@ -307,18 +307,18 @@ class EditCustomView
                                                         foreach ( $groups as $group ) { ?>
                                                             <tr>
                                                                 <th style="width:1%;"><input
-                                                                        id="list_<?php echo $group->id; ?>"
+                                                                        id="list_<?php echo esc_attr( $group->id ); ?>"
                                                                         type="checkbox"
                                                                         class="input_control"
                                                                         name="form_lists[]"
-                                                                        value="<?php echo $group->id; ?>"<?php echo in_array( $group->
+                                                                        value="<?php echo esc_attr( $group->id ); ?>"<?php echo in_array( $group->
                                                                     id,
                                                                         $form->data['lists'] ) ? ' checked="checked"' : ''; ?>
 
                                                                     >
                                                                 </th>
                                                                 <td>
-                                                                    <label for="list_<?php echo $group->id; ?>"><?php echo $group->name; ?></label>
+                                                                    <label for="list_<?php echo esc_attr( $group->id ); ?>"><?php echo esc_html( $group->name ); ?></label>
                                                                 </td>
                                                             </tr>
                                                         <?php } ?>

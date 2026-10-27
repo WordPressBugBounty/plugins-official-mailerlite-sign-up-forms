@@ -42,16 +42,16 @@ class GroupsView
         foreach ( $groups as $group ) { ?>
             <tr>
                 <th style="width:1%;"><input
-                        id="list_<?php echo $group->id; ?>"
+                        id="list_<?php echo esc_attr( $group->id ); ?>"
                         type="checkbox"
                         class="input_control"
                         name="form_lists[]"
-                        value="<?php echo $group->id; ?>"<?php echo in_array( $group->
+                        value="<?php echo esc_attr( $group->id ); ?>"<?php echo in_array( $group->
                     id,
                         $lists ) ? ' checked="checked"' : ''; ?>>
                 </th>
                 <td>
-                    <label for="list_<?php echo $group->id; ?>"><?php echo $group->name; ?></label>
+                    <label for="list_<?php echo esc_attr( $group->id ); ?>"><?php echo esc_html( $group->name ); ?></label>
                 </td>
             </tr>
         <?php } ?>

@@ -48,7 +48,7 @@ class TinyMCE
                         <label for="mailerlite_form_id">Form</label><br/>
                         <select class="widefat" id="mailerlite_form_id" name="mailerlite_form_id">
                             <?php foreach ( $forms as $form ): ?>
-                                <option value="<?php echo $form->id; ?>"><?php echo $form->name; ?></option>
+                                <option value="<?php echo esc_attr( $form->id ); ?>"><?php echo esc_html( $form->name ); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </p>

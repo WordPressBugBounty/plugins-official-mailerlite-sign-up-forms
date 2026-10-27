@@ -33,7 +33,7 @@ class CustomForm
                 <div class="mailerlite-form">
                     <form action="" method="post" novalidate>
                         <?php if ( ! empty( $form_data['title'] )) { ?>
-                            <div class="mailerlite-form-title"><h3><?php echo $form_data['title']; ?></h3></div>
+                            <div class="mailerlite-form-title"><h3><?php echo wp_kses_post( $form_data['title'] ); ?></h3></div>
                         <?php } ?>
                         <div class="mailerlite-form-description"><?php echo wp_kses_post( stripslashes( $form_data['description'] ) ); ?></div>
                         <div class="mailerlite-form-inputs">
@@ -76,13 +76,13 @@ class CustomForm
                                 </div>
                             <?php endforeach; ?>
                             <div class="mailerlite-form-loader"><?php if ( ! empty( $form_data['please_wait'] ) ) {
-                                    echo $form_data['please_wait'];
+                                    echo wp_kses_post( $form_data['please_wait'] );
                                 } else {
                                     _e( 'Please wait...', 'mailerlite' );
                                 } ?></div>
                             <div class="mailerlite-subscribe-button-container">
                                 <button class="mailerlite-subscribe-submit" type="submit">
-                                    <?php echo $form_data['button']; ?>
+                                    <?php echo wp_kses_post( $form_data['button'] ); ?>
                                 </button>
                             </div>
                             <input type="hidden" name="form_id" value="<?php echo $form_id; ?>"/>
@@ -104,7 +104,7 @@ class CustomForm
         ob_start();
         ?>
         <script type="text/javascript">
-                var selectedLanguage = "<?php echo $form_data['language'] ?? false; ?>";
+                var selectedLanguage = <?php echo wp_json_encode( $form_data['language'] ?? false ); ?>;
                 var validationMessages = messages["en"];
                 if(selectedLanguage) {
                     validationMessages = messages[selectedLanguage];

@@ -83,7 +83,10 @@ class Settings
                 });
             }else{
 
-                if (intval( get_option( 'mailerlite_platform', 1) ) !== $ML_Lists->getApiType())
+                // Skip on first connection: the forms table is shared across a Multisite network
+                $is_first_connection = get_option( 'mailerlite_api_key', '' ) === '' && get_option( 'mailerlite_platform', false ) === false;
+
+                if ( ! $is_first_connection && intval( get_option( 'mailerlite_platform', 1 ) ) !== $ML_Lists->getApiType() )
                     self::clearForms();
 
                 update_option( 'mailerlite_api_key', $key );

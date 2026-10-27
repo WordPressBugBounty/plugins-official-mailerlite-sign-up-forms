@@ -97,7 +97,7 @@ class Widget extends WP_Widget
                 <?php foreach ( $forms_data as $form ): ?>
                     <option value="<?php echo $form->id; ?>"<?php echo
                     $form->id == $id ? ' selected="selected"'
-                        : ''; ?>><?php echo $form->name; ?></option>
+                        : ''; ?>><?php echo esc_html( $form->name ); ?></option>
                 <?php endforeach; ?>
             </select>
         </p>

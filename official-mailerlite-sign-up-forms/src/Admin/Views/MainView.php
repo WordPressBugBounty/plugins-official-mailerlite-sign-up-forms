@@ -90,7 +90,7 @@ class MainView
                                         <td class="column-posts num"><?php echo $form->id; ?></td>
                                         <td>
                                             <strong><a class="row-title"
-                                                       href="<?php echo admin_url( 'admin.php?page=mailerlite_main&view=edit&id=' . $form->id ); ?>"><?php echo $form->name; ?></a></strong>
+                                                       href="<?php echo admin_url( 'admin.php?page=mailerlite_main&view=edit&id=' . $form->id ); ?>"><?php echo esc_html( $form->name ); ?></a></strong>
 
                                             <div class="row-actions">
                                         <span class="edit"><a

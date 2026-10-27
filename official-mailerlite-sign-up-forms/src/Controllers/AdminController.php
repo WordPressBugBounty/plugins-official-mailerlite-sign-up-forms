@@ -117,6 +117,11 @@ class AdminController
             if ( isset( $form->data ) ) {
                 $form->data = unserialize( $form->data );
 
+                // Embedded forms can only be managed by administrators
+                if ( $form->type == Form::TYPE_EMBEDDED && ! current_user_can( 'manage_options' ) ) {
+                    wp_die( esc_html__( 'You do not have permission to view this page.', 'mailerlite' ) );
+                }
+
                 if ( $form->type == Form::TYPE_CUSTOM ) {
                     add_filter(
                         'wp_default_editor',
@@ -131,56 +136,23 @@ class AdminController
                         'limit' => AdminController::FIRST_GROUP_LOAD
                     ]);
 
-                    $form_lists = isset( $_POST['form_lists'] ) && is_array( $_POST['form_lists'] ) ? $_POST['form_lists'] : $form->data['lists'];
-
-                    if (! isset($form->data['selected_groups'])) {
-                        $groups_selected = array_filter($groups_from_ml, function($group) use ($form_lists) {
-                            return in_array($group->id, $form_lists);
-                        });
-
-                        if (count($groups_selected) != count($form_lists)) {
-
-                            $groups_from_ml_extended = $API->getGroups([
-                                'limit' => AdminController::FIRST_GROUP_LOAD
-                            ]);
-
-                            $groups_selected = array_filter($groups_from_ml_extended, function($group) use ($form_lists) {
-                                return in_array($group->id, $form_lists);
-                            });
-                        }
-                    } else {
-                        $groups_selected = $form->data['selected_groups'];
-
-                        if (isset($_POST['selected_groups']) && !empty($_POST['selected_groups'])) {
-                            $form_selected_groups =[];
-                            $selected_groups = explode(';*',$_POST['selected_groups']);
-
-                            foreach ($selected_groups as $group) {
-                                $group = explode('::', $group);
-                                $group_data = [];
-                                $group_data['id'] = $group[0];
-                                $group_data['name'] = $group[1];
-                                $form_selected_groups[] = (object)$group_data;
-                            }
-                            $groups_selected = $form_selected_groups;
-                        }
-                    }
-                    if (!isset($form->data['email_label'])) {
-                        $form->data['email_label'] = 'Email';
-                        $form->data['email_placeholder'] = 'Email';
-                    }
-                    $groups_not_selected = array_filter($groups_from_ml, function($group) use ($form_lists) {
-                        return ! in_array($group->id, $form_lists);
-                    });
-
-                    $groups = array_merge($groups_selected, $groups_not_selected);
-
-                    $can_load_more_groups = $API->checkMoreGroups(AdminController::FIRST_GROUP_LOAD);
-
-                    $fields    = $API->getFields();
-
                     if ( isset( $_POST['save_custom_signup_form'] ) ) {
                         Helper::verify_nonce();
+
+                        $api_type   = $API->getApiType();
+                        $form_lists = $form->data['lists'];
+
+                        if ( isset( $_POST['form_lists'] ) && is_array( $_POST['form_lists'] ) ) {
+                            $form_lists = self::sanitizeGroupIds( $_POST['form_lists'], $api_type );
+
+                            if ( count( $form_lists ) !== count( $_POST['form_lists'] ) ) {
+                                wp_die( esc_html__( 'One or more selected groups were invalid. Nothing was saved.', 'mailerlite' ) );
+                            }
+                        }
+
+                        if ( isset( $form->data['selected_groups'] ) && ! empty( $_POST['selected_groups'] ) && is_scalar( $_POST['selected_groups'] ) ) {
+                            $form_selected_groups = self::parseSelectedGroups( $_POST['selected_groups'], $api_type );
+                        }
 
                         $form_name        = htmlspecialchars(Helper::issetWithDefault( 'form_name',
                             __( 'Subscribe for newsletter!', 'mailerlite' ) ));
@@ -217,7 +189,9 @@ class AdminController
                             if ( isset( $field_titles[ $field ] ) ) {
                                 $prepared_fields[ $field ] = [];
                                 $prepared_fields[ $field ]['title'] = htmlspecialchars($field_titles[ $field ]);
-                                $prepared_fields[ $field ]['type']  = isset($_POST['field_type_' . $field]) ? $_POST['field_type_' . $field] : 'text';
+                                $field_type = isset($_POST['field_type_' . $field]) && is_scalar($_POST['field_type_' . $field]) ? (string) $_POST['field_type_' . $field] : 'text';
+                                $field_type = strtolower( $field_type );
+                                $prepared_fields[ $field ]['type']  = in_array( $field_type, [ 'text', 'email', 'number', 'date' ], true ) ? $field_type : 'text';
                             }
                         }
 
@@ -239,9 +213,9 @@ class AdminController
                             'language'        => wp_kses_post( $rolePermission->canEdit('language') ? $language : $form->data['language'] ),
                             'lists'           => $rolePermission->canEdit('groups') ? $form_lists : $form->data['lists'],
                             'fields'          => $rolePermission->canEdit('form_fields') ? $prepared_fields : $form->data['fields'],
-                            'selected_groups' => $rolePermission->canEdit('groups') && isset($form_selected_groups) ? $form_selected_groups : $form->data['selected_groups'],
-                            'email_label' => wp_kses_post( $email_label ),
-                            'email_placeholder' => wp_kses_post( $email_placeholder ),
+                            'selected_groups' => $rolePermission->canEdit('groups') && isset($form_selected_groups) ? $form_selected_groups : ($form->data['selected_groups'] ?? null),
+                            'email_label'       => wp_kses_post( $rolePermission->canEdit('email_label') ? $email_label : ($form->data['email_label'] ?? __( 'Email', 'mailerlite' )) ),
+                            'email_placeholder' => wp_kses_post( $rolePermission->canEdit('email_placeholder') ? $email_placeholder : ($form->data['email_placeholder'] ?? __( 'Email', 'mailerlite' )) ),
                         ];
 
                         $form_name = $rolePermission->canEdit('form_name') ? $form_name : $form->name;
@@ -262,6 +236,40 @@ class AdminController
 
                         $result = 'success';
                     }
+
+                    $form_lists = $form->data['lists'];
+
+                    if (! isset($form->data['selected_groups'])) {
+                        $groups_selected = array_filter($groups_from_ml, function($group) use ($form_lists) {
+                            return in_array($group->id, $form_lists);
+                        });
+
+                        if (count($groups_selected) != count($form_lists)) {
+
+                            $groups_from_ml_extended = $API->getGroups([
+                                'limit' => AdminController::FIRST_GROUP_LOAD
+                            ]);
+
+                            $groups_selected = array_filter($groups_from_ml_extended, function($group) use ($form_lists) {
+                                return in_array($group->id, $form_lists);
+                            });
+                        }
+                    } else {
+                        $groups_selected = $form->data['selected_groups'];
+                    }
+                    if (!isset($form->data['email_label'])) {
+                        $form->data['email_label'] = 'Email';
+                        $form->data['email_placeholder'] = 'Email';
+                    }
+                    $groups_not_selected = array_filter($groups_from_ml, function($group) use ($form_lists) {
+                        return ! in_array($group->id, $form_lists);
+                    });
+
+                    $groups = array_merge($groups_selected, $groups_not_selected);
+
+                    $can_load_more_groups = $API->checkMoreGroups(AdminController::FIRST_GROUP_LOAD);
+
+                    $fields    = $API->getFields();
 
                     new EditCustomView($result, $form, $fields, $groups, $can_load_more_groups);
 
@@ -294,9 +302,11 @@ class AdminController
                         Helper::verify_nonce();
                         $form_name = Helper::issetWithDefault( 'form_name', __( 'Embedded webform', 'mailerlite' ) );
 
-                        $form_webform_id = isset( $_POST['form_webform_id'] )
-                        && isset( $parsed_webforms[ $_POST['form_webform_id'] ] )
-                            ? absint( $_POST['form_webform_id'] ) : 0;
+                        $form_webform_id = isset( $_POST['form_webform_id'] ) ? absint( $_POST['form_webform_id'] ) : 0;
+
+                        if ( ! isset( $parsed_webforms[ $form_webform_id ] ) ) {
+                            wp_die( esc_html__( 'The selected webform could not be loaded from your MailerLite account.', 'mailerlite' ) );
+                        }
 
                         $form_data = [
                             'id'   => $form_webform_id,
@@ -468,6 +478,72 @@ class AdminController
         new GroupsView( $groups, $form, $can_load_more_groups);
 
         exit;
+    }
+
+    /**
+     * Parse "id::name;*id::name" selected groups string, dropping entries with an invalid id
+     *
+     * @param string $selected_groups Unslashed input
+     * @param int $api_type ApiType constant
+     *
+     * @return array
+     */
+    public static function parseSelectedGroups( $selected_groups, $api_type )
+    {
+
+        $groups = [];
+
+        foreach ( explode( ';*', (string) $selected_groups ) as $group ) {
+            $group = explode( '::', $group, 2 );
+            $id    = sanitize_text_field( $group[0] );
+
+            if ( ! self::isValidGroupId( $id, $api_type ) ) {
+                continue;
+            }
+
+            $groups[] = (object) [
+                'id'   => $id,
+                'name' => sanitize_text_field( $group[1] ?? '' ),
+            ];
+        }
+
+        return $groups;
+    }
+
+    /**
+     * Sanitize submitted group ids, dropping invalid ones (non-scalars included) and re-indexing
+     *
+     * @param array $group_ids Raw submitted values, unslashed
+     * @param int $api_type ApiType constant
+     *
+     * @return string[]
+     */
+    public static function sanitizeGroupIds( array $group_ids, $api_type )
+    {
+        $group_ids = array_map( 'sanitize_text_field', $group_ids );
+
+        return array_values( array_filter( $group_ids, function ( $group_id ) use ( $api_type ) {
+            return self::isValidGroupId( $group_id, $api_type );
+        } ) );
+    }
+
+    /**
+     * The Classic API puts group ids in the request path, so they must be digits there.
+     * Rewrite sends them in the request body and its id format isn't pinned down here,
+     * so any non-empty id is accepted.
+     *
+     * @param string $group_id Sanitized id
+     * @param int $api_type ApiType constant
+     *
+     * @return bool
+     */
+    public static function isValidGroupId( $group_id, $api_type )
+    {
+        if ( $api_type == ApiType::CURRENT ) {
+            return ctype_digit( $group_id );
+        }
+
+        return $group_id !== '';
     }
 
     /**

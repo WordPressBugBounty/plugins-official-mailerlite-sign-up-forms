@@ -91,16 +91,21 @@ class Form
         check_admin_referer( 'mailerlite_form', 'ml_nonce' );
 
         $form_id     = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
-        $form_fields = isset( $_POST['form_fields'] ) ? $_POST['form_fields'] : [];
+        $form_fields = isset( $_POST['form_fields'] ) && is_array( $_POST['form_fields'] )
+            ? wp_unslash( $_POST['form_fields'] ) : [];
 
         $api_key = get_option( 'mailerlite_api_key' );
 
-        if ( $form_id > 0 && isset( $form_fields['email'] ) ) {
+        $form_email = isset( $form_fields['email'] ) && is_scalar( $form_fields['email'] )
+            ? (string) $form_fields['email'] : '';
+
+        if ( $form_id > 0 && is_email( $form_email ) ) {
             $query = $wpdb->prepare(
                 "SELECT * FROM
 				{$wpdb->base_prefix}mailerlite_forms
-				WHERE id = %d",
-                $form_id
+				WHERE id = %d AND type = %d",
+                $form_id,
+                self::TYPE_CUSTOM
             );
             $form = $wpdb->get_row($query);
 
@@ -110,13 +115,17 @@ class Form
 
                 $API = new PlatformAPI( $api_key );
 
-                $form_email = $form_fields['email'];
-                unset( $form_fields['email'] );
+                // Only forward fields that are configured on this form
+                $allowed_fields = array_keys( (array) ( $form->data['fields'] ?? [] ) );
 
                 $fields = [];
 
-                foreach ( $form_fields as $field => $value ) {
-                    $fields[ $field ] = $value;
+                foreach ( $allowed_fields as $field ) {
+                    if ( $field === 'email' || ! isset( $form_fields[ $field ] ) || ! is_scalar( $form_fields[ $field ] ) ) {
+                        continue;
+                    }
+
+                    $fields[ $field ] = sanitize_text_field( $form_fields[ $field ] );
                 }
 
                 $subscriber = [
@@ -124,23 +133,30 @@ class Form
                     'fields' => $fields,
                 ];
 
+                // Pass resubscribe=0: anyone can submit this public form, so it must not reactivate unsubscribed addresses.
+                // Only the Classic API honours the flag; RewriteAPI::addSubscriberToGroup ignores it
                 $subbed = 0;
                 if($API->getApiType() == ApiType::REWRITE) {
-                    if ($API->addSubscriberToGroup( $subscriber, $form->data['lists'], 1 )) {
+                    if ($API->addSubscriberToGroup( $subscriber, $form->data['lists'], 0 )) {
                         $subbed = count($form->data['lists']);
                     }
                 } else {
                     foreach ( $form->data['lists'] as $list ) {
 
+                        // Rows saved before group ids were checked may hold a value that is unsafe in the request path
+                        if ( $list !== '' && ! AdminController::isValidGroupId( (string) $list, ApiType::CURRENT ) ) {
+                            continue;
+                        }
+
                         if ( $list != '' ) {
 
-                            if ( $API->addSubscriberToGroup( $subscriber, $list, 1 ) ) {
+                            if ( $API->addSubscriberToGroup( $subscriber, $list, 0 ) ) {
 
                                 $subbed++;
                             }
                         }else{
 
-                            if ( $API->addSubscriber( $subscriber, 1)) {
+                            if ( $API->addSubscriber( $subscriber, 0)) {
                                 $subbed++;
                             }
                         }
@@ -184,7 +200,7 @@ class Form
             );
         }
 
-        exit;
+        wp_die();
     }
 
     /**
@@ -276,23 +292,18 @@ class Form
                 'fields'          => [ 'email' => __( 'Email', 'mailerlite' ) ],
             ];
 
+            $API = new PlatformAPI( AdminController::apiKey() );
+
             if ( array_key_exists( 'create_signup_form_now', $_POST ) ) {
                 $form_name = htmlspecialchars(Helper::issetWithDefault( 'form_name',
                     __( 'Subscribe for newsletter!', 'mailerlite' ) ));
-                $form_data['lists'] = $_POST['form_lists'];
-                $selected_groups = explode(';*',$_POST['selected_groups']);
-                foreach ($selected_groups as $group) {
-                    $group = explode('::', $group);
-                    $group_data = [
-                        'id'   => sanitize_text_field($group[0]),
-                        'name' => sanitize_text_field($group[1]),
-                    ];
-
-                    $form_data['selected_groups'][] = (object)$group_data;
-                }
+                $form_data['lists'] = isset( $_POST['form_lists'] ) && is_array( $_POST['form_lists'] )
+                    ? AdminController::sanitizeGroupIds( wp_unslash( $_POST['form_lists'] ), $API->getApiType() ) : [];
+                $form_data['selected_groups'] = AdminController::parseSelectedGroups(
+                    isset( $_POST['selected_groups'] ) && is_scalar( $_POST['selected_groups'] ) ? wp_unslash( $_POST['selected_groups'] ) : '',
+                    $API->getApiType()
+                );
             } else {
-                $API = new PlatformAPI( AdminController::apiKey() );
-
                 $groups = $API->getGroups([
                     'limit' => AdminController::FIRST_GROUP_LOAD
                 ]);

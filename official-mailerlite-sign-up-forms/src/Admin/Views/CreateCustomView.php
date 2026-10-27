@@ -54,14 +54,14 @@ class CreateCustomView
                                     <tbody>
                                     <?php foreach ( $groups as $group ): ?>
                                         <tr>
-                                            <th style="width:1%;"><input id="list_<?php echo $group->id; ?>"
+                                            <th style="width:1%;"><input id="list_<?php echo esc_attr( $group->id ); ?>"
                                                                          type="checkbox"
                                                                          class="input_control"
                                                                          name="form_lists[]"
-                                                                         value="<?php echo $group->id; ?>">
+                                                                         value="<?php echo esc_attr( $group->id ); ?>">
                                             </th>
                                             <td><label
-                                                    for="list_<?php echo $group->id; ?>"><?php echo $group->name; ?></label>
+                                                    for="list_<?php echo esc_attr( $group->id ); ?>"><?php echo esc_html( $group->name ); ?></label>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
