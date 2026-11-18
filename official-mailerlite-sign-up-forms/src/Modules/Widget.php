@@ -36,7 +36,7 @@ class Widget extends WP_Widget
         $form_id = isset( $instance['mailerlite_form_id'] )
                    && intval(
                        $instance['mailerlite_form_id']
-                   ) ? $instance['mailerlite_form_id'] : 0;
+                   ) ? absint( $instance['mailerlite_form_id'] ) : 0;
         $query = $wpdb->prepare(
             "SELECT * FROM
 			{$wpdb->base_prefix}mailerlite_forms

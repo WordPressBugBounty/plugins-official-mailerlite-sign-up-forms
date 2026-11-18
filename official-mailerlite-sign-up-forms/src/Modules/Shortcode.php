@@ -107,9 +107,11 @@ class Shortcode
             'form_id' => '1',
         ], $attributes );
 
+        $form_id = absint( $form_attributes['form_id'] );
+
         ob_start();
 
-        ( new Form() )->load_mailerlite_form( $form_attributes['form_id'] );
+        ( new Form() )->load_mailerlite_form( $form_id );
 
         return ob_get_clean();
     }

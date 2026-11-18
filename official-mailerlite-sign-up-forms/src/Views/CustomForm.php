@@ -25,6 +25,7 @@ class CustomForm
      */
     private function view($form_id, $form_data)
     {
+        $form_id = absint( $form_id );
         $unique_id = uniqid();
 
         ?>

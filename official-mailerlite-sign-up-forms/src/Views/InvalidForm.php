@@ -26,6 +26,7 @@ class InvalidForm
      */
     private function view($form_id)
     {
+        $form_id = absint( $form_id );
 
         ?>
         <div id="mailerlite-form_<?php echo $form_id; ?>" data-temp-id="<?php echo uniqid(); ?>">
